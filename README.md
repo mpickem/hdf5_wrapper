@@ -2,7 +2,7 @@
 ## Installation
 Compile the file `hdf5_wrapper.f90` with proper linking to your local `hdf5 `library.
 In your program use the binding `use hdf5_wrapper` to use the wrapper (see test_example.f90).
-An minimalistic compilation script can be found in `compile.sh`.
+A minimalistic compilation script can be found in `compile.sh`.
 
 ## HDF5 interface and file handling
 
@@ -37,8 +37,8 @@ end program
 | hdf5 command                 | description                        |
 |------------------------------|------------------------------------|
 | `hdf5_create_group(ifile, gname)`          | create group(s) (parents included) |
-| `hdf5_list_groups (ifile, gname)`           | get list of groups                 |
-| `hdf5_get_number_groups (ifile, gname)`     | get number of lists                |
+| `hdf5_list_groups(ifile, gname)`           | get list of groups                 |
+| `hdf5_get_number_groups(ifile, gname)`     | get number of lists                |
 
 We are able to create groups by simply providing the file identifier `ifile` and the full (unix-like) path.
 The wrapper checks for the existence of parent groups and creates them if they do not exist.
@@ -92,8 +92,9 @@ We provide wrappers for the following datatypes for datasets:
 * `complex(4)`
 * `complex(8)`
 
-The output can be done for `0D` to `7D` (Fortran maximum) arrays. The readin functions
+The in/output can be done for `0D` to `7D` (Fortran maximum) arrays. The readin functions
 work the same way, only that we have to provide an allocatable array.
+Please note that there is no check for matching hdf5 and fortran datatypes.
 
 ```
 program datasets
@@ -132,8 +133,8 @@ end program
 
 | hdf5 command                 | description                        |
 |------------------------------|------------------------------------|
-| `hdf5_write_attribute(ifile, location, attr_name, attribute`       | write attribute                    |
-| `hdf5_read_attribute(ifile, location, attr_name, variable`        | read attribute                     |
+| `hdf5_write_attribute(ifile, location, attr_name, attribute)`       | write attribute                    |
+| `hdf5_read_attribute(ifile, location, attr_name, variable)`        | read attribute                     |
 
 We also provide a small interface for reading and writing data.
 The following datatypes are supported:
@@ -193,3 +194,10 @@ end program
 | `hdf5_get_shape(ifile, dataset, shape_array)`             | get shape in form of an array      |
 | `hdf5_write_attribute(ifile, location, attr_name, attribute`       | write attribute                    |
 | `hdf5_read_attribute(ifile, location, attr_name, variable`        | read attribute                     |
+
+## Future Features
+
+* `hdf5_list_attributes`
+* `hdf5_write_data(ifile, dname, data [,gzip])`
+* Loading of partial data
+* Attributes with arbitrary dimensionality (0D to 7D)
