@@ -194,7 +194,7 @@ module hdf5_wrapper
     ! the according group names are stored in the array ngroup(1...grpcnt)
     call h5eset_auto_f(0,hdf_err) ! deactivate error printing
     grp_parent_id = ifile ! for the first entry into the file
-    do i=1,grpcnt-1
+    do i=1,grpcnt
       ! check for existance
       ! this check causes all the unecessary error messages
       ! I tried doing it with h5oexists_by_name_f, but there one
@@ -210,12 +210,6 @@ module hdf5_wrapper
     call h5eclear_f(hdf_err)      ! clear the error
     call h5eset_auto_f(1,hdf_err) ! acitvate it again
 
-    ! create without checking -> so user knows if a group already exists
-    ! -> error messages
-    call h5gcreate_f(grp_parent_id, trim(ngroup(grpcnt)), grp_id, hdf_err)
-    if (grp_parent_id .ne. ifile) then
-      call h5gclose_f(grp_parent_id, hdf_err)
-    endif
     call h5gclose_f(grp_id, hdf_err)
 
     deallocate(ngroup)
