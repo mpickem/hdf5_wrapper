@@ -8,7 +8,7 @@ tar xf hdf5-x.y.z.tar
 cd hdf5-x.y.z
 CC=gcc
 FC=gfortran
-./configure --enable-fortran --enable-fortran2003 -prefix=/opt/hdf5-x.y.z_gcc
+./configure --enable-fortran --enable-fortran2003 --prefix=/opt/hdf5-x.y.z_gcc
 make
 make check
 make install
@@ -16,7 +16,7 @@ make install
 
 ## Wrapper installation
 Compile the file `hdf5_wrapper.f90` with proper linking to your local `hdf5 `library.
-In your program use the binding `use hdf5_wrapper` to use the wrapper (see test_example.f90).
+In your program use the binding `use hdf5_wrapper` to use the wrapper (see `test_example.f90`).
 A minimalistic compilation script can be found in `compile.sh`.
 
 ## HDF5 interface and file handling
@@ -29,7 +29,7 @@ A minimalistic compilation script can be found in `compile.sh`.
 | `hdf5_open_file(fname, ifile [,rdonly])`             | open hdf5 file                     |
 | `hdf5_close_file(ifile)`             | close hdf5 file                     |
 
-`fname` represents a Fortran string (character array) while `ifile` is a an integer of the form
+`fname` represents a Fortran string (character array) while `ifile` is a an integer of the
 `integer(hid_t)` (hence we also need to make the hdf5 library available outside the wrapper).
 
 ```
@@ -136,7 +136,7 @@ program datasets
 
 	! dimensions and shape
 	call hdf5_get_shape(ifile, '/group1/group2/dataset', hdf_shape)
-	dimensions = hdf5_get_dimensions
+	dimensions = hdf5_get_dimensions(ifile, '/group1/group2/dataset')
 
 	call hdf5_close_file(ifile)
 	call hdf5_finalize()
