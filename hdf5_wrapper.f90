@@ -93,16 +93,20 @@ module hdf5_wrapper
   end interface hdf5_write_data
 
   interface hdf5_write_attribute
-    module procedure hdf5_write_attribute_int4, &
-                     hdf5_write_attribute_real4,&
-                     hdf5_write_attribute_real8,&
+    module procedure hdf5_write_attribute_int4,    &
+                     hdf5_write_attribute_real4,   &
+                     hdf5_write_attribute_real8,   &
+                     hdf5_write_attribute_complex4,&
+                     hdf5_write_attribute_complex8,&
                      hdf5_write_attribute_string
   end interface hdf5_write_attribute
 
   interface hdf5_read_attribute
-    module procedure hdf5_read_attribute_int4, &
-                     hdf5_read_attribute_real4,&
-                     hdf5_read_attribute_real8,&
+    module procedure hdf5_read_attribute_int4,    &
+                     hdf5_read_attribute_real4,   &
+                     hdf5_read_attribute_real8,   &
+                     hdf5_read_attribute_complex4,&
+                     hdf5_read_attribute_complex8,&
                      hdf5_read_attribute_string
   end interface hdf5_read_attribute
 
@@ -124,12 +128,14 @@ module hdf5_wrapper
     ! truncate -> if it already exists, erase all data
     ! other possibility: h5f_acc_excl_f -> fail if already exists
     call h5fcreate_f(trim(adjustl(fname)), h5f_acc_trunc_f, ifile, hdf_err)
+    ! we only create here
+    call h5fclose_f(ifile, hdf_err)
   end subroutine hdf5_create_file
 
   subroutine hdf5_open_file(fname, ifile, rdonly)
     character(len=*), intent(in)  :: fname
     integer(hid_t), intent(out)    :: ifile
-    logical, intent(in), optional :: rdonly
+    logical, optional :: rdonly
 
     if (present(rdonly)) then
       if (rdonly) then
@@ -169,6 +175,8 @@ module hdf5_wrapper
     endif
     ! now we have a string with looks like 'group1/group2/group3'
 
+    if (len_trim(strim) .eq. 0) return
+
     allocate(ngroup(30))
     grpcnt = 1
     do
@@ -186,17 +194,29 @@ module hdf5_wrapper
     ! the according group names are stored in the array ngroup(1...grpcnt)
     call h5eset_auto_f(0,hdf_err) ! deactivate error printing
     grp_parent_id = ifile ! for the first entry into the file
-    do i=1,grpcnt
+    do i=1,grpcnt-1
       ! check for existance
       ! this check causes all the unecessary error messages
+      ! I tried doing it with h5oexists_by_name_f, but there one
+      ! cannot specifically check for group ... so
+      ! I will stick to this 'hack'
       call h5gopen_f(grp_parent_id, trim(ngroup(i)), grp_id, hdf_err)
       if (hdf_err .ne. 0) then ! failed
         call h5gcreate_f(grp_parent_id, trim(ngroup(i)), grp_id, hdf_err)
       endif
+      call h5gclose_f(grp_parent_id, hdf_err)
       grp_parent_id = grp_id
     enddo
     call h5eclear_f(hdf_err)      ! clear the error
     call h5eset_auto_f(1,hdf_err) ! acitvate it again
+
+    ! create without checking -> so user knows if a group already exists
+    ! -> error messages
+    call h5gcreate_f(grp_parent_id, trim(ngroup(grpcnt)), grp_id, hdf_err)
+    if (grp_parent_id .ne. ifile) then
+      call h5gclose_f(grp_parent_id, hdf_err)
+    endif
+    call h5gclose_f(grp_id, hdf_err)
 
     deallocate(ngroup)
 
@@ -2537,44 +2557,46 @@ module hdf5_wrapper
 
   end subroutine
 
-  ! subroutine hdf5_write_attribute_complex4(ifile, location, attrname, attr)
-  !   integer(hid_t), intent(in)   :: ifile
-  !   character(len=*), intent(in) :: location
-  !   character(len=*), intent(in) :: attrname
-  !   complex(4)                   :: attr
+  subroutine hdf5_write_attribute_complex4(ifile, location, attrname, attr)
+    integer(hid_t), intent(in)   :: ifile
+    character(len=*), intent(in) :: location
+    character(len=*), intent(in) :: attrname
+    complex(4)                   :: attr
 
-  !   integer(8), dimension(0)     :: dims
-  !   integer(hid_t) :: obj_id, dspace_id, attr_id
+    integer(8), dimension(0)     :: dims
+    integer(hid_t) :: obj_id, dspace_id, attr_id
 
+    call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
+    call h5screate_simple_f(0, dims, dspace_id, hdf_err)
+    call h5acreate_f(obj_id, trim(adjustl(attrname)), complex_id_sp, dspace_id, attr_id, hdf_err)
+    ! for whatever reason ... this works ... I really dont know why
+    ! and it has to be in this order
+    call h5awrite_f(attr_id, complex_id_sp, aimag(attr), dims, hdf_err)
+    call h5awrite_f(attr_id, complex_id_sp, real(attr), dims, hdf_err)
+    call h5aclose_f(attr_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    call h5oclose_f(obj_id, hdf_err)
+  end subroutine
 
-  !   call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
-  !   call h5screate_simple_f(0, dims, dspace_id, hdf_err)
-  !   call h5acreate_f(obj_id, trim(adjustl(attrname)), complex_id_sp, dspace_id, attr_id, hdf_err)
-  !   call h5awrite_f(attr_id, complex_id_i_sp, real(attr), dims, hdf_err)
-  !   call h5awrite_f(attr_id, complex_id_r_sp, aimag(attr), dims, hdf_err)
-  !   call h5aclose_f(attr_id, hdf_err)
-  !   call h5sclose_f(dspace_id, hdf_err)
-  !   call h5oclose_f(obj_id, hdf_err)
-  ! end subroutine
+  subroutine hdf5_write_attribute_complex8(ifile, location, attrname, attr)
+    integer(hid_t), intent(in)   :: ifile
+    character(len=*), intent(in) :: location
+    character(len=*), intent(in) :: attrname
+    complex(8)                   :: attr
 
-  ! subroutine hdf5_write_attribute_complex8(ifile, location, attrname, attr)
-  !   integer(hid_t), intent(in)   :: ifile
-  !   character(len=*), intent(in) :: location
-  !   character(len=*), intent(in) :: attrname
-  !   complex(8)                   :: attr
+    integer(8), dimension(0)     :: dims
+    integer(hid_t) :: obj_id, dspace_id, attr_id
 
-  !   integer(8), dimension(0)     :: dims
-  !   integer(hid_t) :: obj_id, dspace_id, attr_id
-
-  !   call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
-  !   call h5screate_simple_f(0, dims, dspace_id, hdf_err)
-  !   call h5acreate_f(obj_id, trim(adjustl(attrname)), complex_id_dp, dspace_id, attr_id, hdf_err)
-  !   call h5awrite_f(attr_id, complex_id_i_dp, aimag(attr), dims, hdf_err)
-  !   call h5awrite_f(attr_id, complex_id_r_dp, real(attr), dims, hdf_err)
-  !   call h5aclose_f(attr_id, hdf_err)
-  !   call h5sclose_f(dspace_id, hdf_err)
-  !   call h5oclose_f(obj_id, hdf_err)
-  ! end subroutine
+    call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
+    call h5screate_simple_f(0, dims, dspace_id, hdf_err)
+    call h5acreate_f(obj_id, trim(adjustl(attrname)), complex_id_dp, dspace_id, attr_id, hdf_err)
+    ! same story here
+    call h5awrite_f(attr_id, complex_id_dp, aimag(attr), dims, hdf_err)
+    call h5awrite_f(attr_id, complex_id_dp, real(attr), dims, hdf_err)
+    call h5aclose_f(attr_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    call h5oclose_f(obj_id, hdf_err)
+  end subroutine
 
   subroutine hdf5_read_attribute_int4(ifile, location, attrname, attr)
     integer(hid_t), intent(in)   :: ifile
@@ -2653,6 +2675,48 @@ module hdf5_wrapper
     call h5oclose_f(obj_id, hdf_err)
   end subroutine
 
+  subroutine hdf5_read_attribute_complex4(ifile, location, attrname, attr)
+    integer(hid_t), intent(in)   :: ifile
+    character(len=*), intent(in) :: location
+    character(len=*), intent(in) :: attrname
+    complex(4), intent(out)      :: attr
+
+    complex(4) :: ci = (0.0, 1.0)
+    integer(8), dimension(0)     :: dims
+    integer(hid_t) :: obj_id, dspace_id, attr_id
+    real(4) :: tmp_r, tmp_i
+
+    call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
+    call h5aopen_f(obj_id, trim(adjustl(attrname)), attr_id, hdf_err)
+    call h5aread_f(attr_id, complex_id_r_sp, tmp_r, dims, hdf_err)
+    call h5aread_f(attr_id, complex_id_i_sp, tmp_i, dims, hdf_err)
+    call h5aclose_f(attr_id, hdf_err)
+    call h5oclose_f(obj_id, hdf_err)
+
+    attr = tmp_r + ci*tmp_i
+  end subroutine
+
+  subroutine hdf5_read_attribute_complex8(ifile, location, attrname, attr)
+    integer(hid_t), intent(in)   :: ifile
+    character(len=*), intent(in) :: location
+    character(len=*), intent(in) :: attrname
+    complex(8), intent(out)      :: attr
+
+    complex(8) :: ci = (0.d0, 1.d0)
+    integer(8), dimension(0)     :: dims
+    integer(hid_t) :: obj_id, dspace_id, attr_id
+    real(8) :: tmp_r, tmp_i
+
+    call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
+    call h5aopen_f(obj_id, trim(adjustl(attrname)), attr_id, hdf_err)
+    call h5aread_f(attr_id, complex_id_r_dp, tmp_r, dims, hdf_err)
+    call h5aread_f(attr_id, complex_id_i_dp, tmp_i, dims, hdf_err)
+    call h5aclose_f(attr_id, hdf_err)
+    call h5oclose_f(obj_id, hdf_err)
+
+    attr = tmp_r + ci*tmp_i
+  end subroutine
+
   integer function hdf5_get_number_groups(ifile, location)
     integer(hid_t), intent(in)                  :: ifile
     character(len=*), intent(in)                :: location
@@ -2710,6 +2774,7 @@ module hdf5_wrapper
 
     call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
     call h5aget_num_attrs_f(obj_id, attr_num, hdf_err)
+    call h5oclose_f(obj_id, hdf_err)
 
     hdf5_get_number_attributes = attr_num
   end function
@@ -2739,6 +2804,7 @@ module hdf5_wrapper
         members(ngroups) = trim(strim)
       endif
     enddo
+    call h5oclose_f(obj_id, hdf_err)
     if (ngroups .eq. 0) return
     allocate(groups(ngroups))
     groups(:) = members(:ngroups)
@@ -2770,6 +2836,7 @@ module hdf5_wrapper
         members(ndsets) = trim(strim)
       endif
     enddo
+    call h5oclose_f(obj_id, hdf_err)
     if (ndsets .eq. 0) return
     allocate(dsets(ndsets))
     dsets(:) = members(:ndsets)

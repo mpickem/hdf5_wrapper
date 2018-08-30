@@ -1,5 +1,20 @@
 # HDF5 wrapper
-## Installation
+## HDF5 Installation
+Download the tar ball from the [official homepage](https://support.hdfgroup.org/HDF5/).
+Installation for e.g. gnu compiler is done via
+
+```
+tar xf hdf5-x.y.z.tar
+cd hdf5-x.y.z
+CC=gcc
+FC=gfortran
+./configure --enable-fortran -prefix=/opt/hdf5-x.y.z_gcc
+make
+make check
+make install
+```
+
+## Wrapper installation
 Compile the file `hdf5_wrapper.f90` with proper linking to your local `hdf5 `library.
 In your program use the binding `use hdf5_wrapper` to use the wrapper (see test_example.f90).
 A minimalistic compilation script can be found in `compile.sh`.
@@ -135,13 +150,16 @@ end program
 |------------------------------|------------------------------------|
 | `hdf5_write_attribute(ifile, location, attr_name, attribute)`       | write attribute                    |
 | `hdf5_read_attribute(ifile, location, attr_name, variable)`        | read attribute                     |
+| `hdf5_get_number_attributes(ifile, location)`        | get number of attributes                     |
 
-We also provide a small interface for reading and writing data.
+We also provide a small interface for reading and writing attributes.
 The following datatypes are supported:
 
 * `integer(4)`
 * `real(4)`
 * `real(8)`
+* `complex(4)`
+* `complex(8)`
 * `character(len=*)`
 
 Attributes can be attached to both groups and datasets. For this reason
@@ -192,12 +210,12 @@ end program
 | `hdf5_get_number_datasets(ifile, group)`   | get number of datasets             |
 | `hdf5_get_dimensions(ifile, dataset)`        | get number of dimensions           |
 | `hdf5_get_shape(ifile, dataset, shape_array)`             | get shape in form of an array      |
-| `hdf5_write_attribute(ifile, location, attr_name, attribute`       | write attribute                    |
-| `hdf5_read_attribute(ifile, location, attr_name, variable`        | read attribute                     |
+| `hdf5_write_attribute(ifile, location, attr_name, attribute)`       | write attribute                    |
+| `hdf5_read_attribute(ifile, location, attr_name, variable)`        | read attribute                     |
+| `hdf5_get_number_attributes(ifile, location)`        | get number of attributes                     |
 
 ## Future Features
 
 * `hdf5_list_attributes`
-* `hdf5_write_data(ifile, dname, data [,gzip])`
+* `hdf5_write_data(ifile, dname, data [,gzip])` with **manual** chunking.
 * Loading of partial data
-* Attributes with arbitrary dimensionality (0D to 7D)
