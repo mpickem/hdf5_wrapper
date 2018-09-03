@@ -1,6 +1,6 @@
 # HDF5 wrapper
 ## HDF5 Installation
-Download the tar ball from the [official homepage](https://support.hdfgroup.org/HDF5/).
+Download the tar ball from the [official homepage](http://portal.hdfgroup.org/display/support).
 Installation for e.g. gnu compiler is done via
 
 ```
@@ -14,6 +14,8 @@ make check
 make install
 ```
 
+For more detailed library information please refer to [[Libraries and tools reference]](http://portal.hdfgroup.org/display/HDF5/Libraries+and+Tools+Reference).
+
 ## Wrapper installation
 Compile the file `hdf5_wrapper.f90` with proper linking to your local `hdf5 `library.
 In your program use the binding `use hdf5_wrapper` to use the wrapper (see `test_example.f90`).
@@ -21,13 +23,13 @@ A minimalistic compilation script can be found in `compile.sh`.
 
 ## HDF5 interface and file handling
 
-| hdf5 command                 | description                        |
-|------------------------------|------------------------------------|
-| `hdf5_init()`                | initialize hdf5 interface          |
-| `hdf5_finalize()`            | close hdf5 interface               |
-| `hdf5_create_file(fname)`    | create hdf5 file                   |
-| `hdf5_open_file(fname, ifile [,rdonly])`             | open hdf5 file                     |
-| `hdf5_close_file(ifile)`             | close hdf5 file                     |
+| hdf5 command                             | description                          |
+| ---------------------------------------- | ------------------------------------ |
+| `hdf5_init()`                            | initialize hdf5 interface            |
+| `hdf5_finalize()`                        | close hdf5 interface                 |
+| `hdf5_create_file(fname)`                | create hdf5 file                     |
+| `hdf5_open_file(fname, ifile [,rdonly])` | open hdf5 file                       |
+| `hdf5_close_file(ifile)`                 | close hdf5 file                      |
 
 `fname` represents a Fortran string (character array) while `ifile` is a an integer of the
 `integer(hid_t)` (hence we also need to make the hdf5 library available outside the wrapper).
@@ -49,11 +51,11 @@ end program
 
 ## Groups
 
-| hdf5 command                 | description                        |
-|------------------------------|------------------------------------|
-| `hdf5_create_group(ifile, gname)`          | create group(s) (parents included) |
-| `hdf5_list_groups(ifile, gname)`           | get list of groups                 |
-| `hdf5_get_number_groups(ifile, gname)`     | get number of lists                |
+| hdf5 command                           | description                          |
+| -------------------------------------- | ------------------------------------ |
+| `hdf5_create_group(ifile, gname)`      | create group(s) (parents included)   |
+| `hdf5_list_groups(ifile, gname)`       | get list of groups                   |
+| `hdf5_get_number_groups(ifile, gname)` | get number of lists                  |
 
 We are able to create groups by simply providing the file identifier `ifile` and the full (unix-like) path.
 The wrapper checks for the existence of parent groups and creates them if they do not exist.
@@ -88,14 +90,14 @@ The resulting file can be inspected by `h5ls -lr`.
 
 ## Datasets
 
-| hdf5 command                 | description                        |
-|------------------------------|------------------------------------|
-| `hdf5_read_data(ifile, dname, adata)`             | read data from dataset             |
-| `hdf5_write_data(ifile, dname, data)`            | write datasets from arrays             |
-| `hdf5_list_datasets(ifile, group, list)`         | get list of datasets             |
-| `hdf5_get_number_datasets(ifile, group)`   | get number of datasets             |
-| `hdf5_get_dimensions(ifile, dataset)`        | get number of dimensions           |
-| `hdf5_get_shape(ifile, dataset, shape_array)`             | get shape in form of an array      |
+| hdf5 command                                  | description                          |
+| --------------------------------------------- | ------------------------------------ |
+| `hdf5_read_data(ifile, dname, adata)`         | read data from dataset               |
+| `hdf5_write_data(ifile, dname, data)`         | write datasets from arrays           |
+| `hdf5_list_datasets(ifile, group, list)`      | get list of datasets                 |
+| `hdf5_get_number_datasets(ifile, group)`      | get number of datasets               |
+| `hdf5_get_dimensions(ifile, dataset)`         | get number of dimensions             |
+| `hdf5_get_shape(ifile, dataset, shape_array)` | get shape in form of an array        |
 
 The dataset functions work in the same way as the group functions. One can create datasets with a full
 (unix-like) path where, again, the non-existent parent groups are created on the fly.
@@ -146,11 +148,11 @@ end program
 
 ## Attributes
 
-| hdf5 command                 | description                        |
-|------------------------------|------------------------------------|
-| `hdf5_write_attribute(ifile, location, attr_name, attribute)`       | write attribute                    |
-| `hdf5_read_attribute(ifile, location, attr_name, variable)`        | read attribute                     |
-| `hdf5_get_number_attributes(ifile, location)`        | get number of attributes                     |
+| hdf5 command                                                  | description                          |
+| ------------------------------------------------------------- | ------------------------------------ |
+| `hdf5_write_attribute(ifile, location, attr_name, attribute)` | write attribute                      |
+| `hdf5_read_attribute(ifile, location, attr_name, variable)`   | read attribute                       |
+| `hdf5_get_number_attributes(ifile, location)`                 | get number of attributes             |
 
 We also provide a small interface for reading and writing attributes.
 The following datatypes are supported:
@@ -194,25 +196,25 @@ end program
 
 ## Summary of commands
 
-| hdf5 command                 | description                        |
-|------------------------------|------------------------------------|
-| `hdf5_init()`                | initialize hdf5 interface          |
-| `hdf5_finalize()`            | close hdf5 interface               |
-| `hdf5_create_file(fname)`    | create hdf5 file                   |
-| `hdf5_open_file(fname, ifile [,rdonly])`             | open hdf5 file                     |
-| `hdf5_close_file(ifile)`             | close hdf5 file                     |
-| `hdf5_create_group(ifile, gname)`          | create group(s) (parents included) |
-| `hdf5_list_groups (ifile, gname)`           | get list of groups                 |
-| `hdf5_get_number_groups (ifile, gname)`     | get number of lists                |
-| `hdf5_read_data(ifile, dname, adata)`             | read data from dataset             |
-| `hdf5_write_data(ifile, dname, data)`            | write datasets from arrays             |
-| `hdf5_list_datasets(ifile, group, list)`         | get list of datasets             |
-| `hdf5_get_number_datasets(ifile, group)`   | get number of datasets             |
-| `hdf5_get_dimensions(ifile, dataset)`        | get number of dimensions           |
-| `hdf5_get_shape(ifile, dataset, shape_array)`             | get shape in form of an array      |
-| `hdf5_write_attribute(ifile, location, attr_name, attribute)`       | write attribute                    |
-| `hdf5_read_attribute(ifile, location, attr_name, variable)`        | read attribute                     |
-| `hdf5_get_number_attributes(ifile, location)`        | get number of attributes                     |
+| hdf5 command                                                  | description                          |
+| ------------------------------------------------------------- | ------------------------------------ |
+| `hdf5_init()`                                                 | initialize hdf5 interface            |
+| `hdf5_finalize()`                                             | close hdf5 interface                 |
+| `hdf5_create_file(fname)`                                     | create hdf5 file                     |
+| `hdf5_open_file(fname, ifile [,rdonly])`                      | open hdf5 file                       |
+| `hdf5_close_file(ifile)`                                      | close hdf5 file                      |
+| `hdf5_create_group(ifile, gname)`                             | create group(s) (parents included)   |
+| `hdf5_list_groups (ifile, gname)`                             | get list of groups                   |
+| `hdf5_get_number_groups (ifile, gname)`                       | get number of lists                  |
+| `hdf5_read_data(ifile, dname, adata)`                         | read data from dataset               |
+| `hdf5_write_data(ifile, dname, data)`                         | write datasets from arrays           |
+| `hdf5_list_datasets(ifile, group, list)`                      | get list of datasets                 |
+| `hdf5_get_number_datasets(ifile, group)`                      | get number of datasets               |
+| `hdf5_get_dimensions(ifile, dataset)`                         | get number of dimensions             |
+| `hdf5_get_shape(ifile, dataset, shape_array)`                 | get shape in form of an array        |
+| `hdf5_write_attribute(ifile, location, attr_name, attribute)` | write attribute                      |
+| `hdf5_read_attribute(ifile, location, attr_name, variable)`   | read attribute                       |
+| `hdf5_get_number_attributes(ifile, location)`                 | get number of attributes             |
 
 ## Future Features
 
