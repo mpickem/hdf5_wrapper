@@ -2896,6 +2896,23 @@ module hdf5_wrapper
     enddo
   end subroutine
 
+  subroutine hdf5_delete_attribute(ifile, location, attr)
+    integer(hid_t), intent(in)   :: ifile
+    character(len=*), intent(in) :: location
+    character(len=*), intent(in) :: attr
+
+    integer(hid_t) :: obj_id
+    call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
+    call h5adelete_f(obj_id, attr, hdf_err)
+    call h5oclose_f(obj_id, hdf_err)
+  end subroutine hdf5_delete_attribute
+
+  subroutine hdf5_delete(ifile, location)
+    integer(hid_t), intent(in)                  :: ifile
+    character(len=*), intent(in)                :: location
+    call h5ldelete_f(ifile, location, hdf_err)
+  end subroutine hdf5_delete
+
   ! help function with separates /group1/group2/dset -> /group1/group2 and dset
   subroutine hdf5_help_separate_dsetname(dsetfull, gname, dset)
     character(len=*), intent(in)    :: dsetfull

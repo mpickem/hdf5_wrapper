@@ -195,6 +195,15 @@ program attributes
 end program
 ```
 
+## Deletion
+
+| hdf5 command                                         | description                          |
+| ---------------------------------------------------- | ------------------------------------ |
+| `hdf5_delete(ifile, location)`                       | delete group/dataset                 |
+| `hdf5_delete_attribute(ifile, location, attr_name)`  | delete attribute                     |
+
+Deletion of datasets and groups is internally done simply by unlinking the objects.
+
 ## Summary of commands
 
 | hdf5 command                                                  | description                          |
@@ -217,6 +226,8 @@ end program
 | `hdf5_read_attribute(ifile, location, attr_name, variable)`   | read attribute                       |
 | `hdf5_get_number_attributes(ifile, location)`                 | get number of attributes             |
 | `hdf5_list_attributes(ifile, location, list)`                 | get list of attributes               |
+| `hdf5_delete(ifile, location)`                                | delete group/dataset                 |
+| `hdf5_delete_attribute(ifile, location, attr_name)`           | delete attribute                     |
 
 ## Future Features
 
