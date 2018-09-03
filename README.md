@@ -153,6 +153,7 @@ end program
 | `hdf5_write_attribute(ifile, location, attr_name, attribute)` | write attribute                      |
 | `hdf5_read_attribute(ifile, location, attr_name, variable)`   | read attribute                       |
 | `hdf5_get_number_attributes(ifile, location)`                 | get number of attributes             |
+| `hdf5_list_attributes(ifile, location, list)`                 | get list of attributes               |
 
 We also provide a small interface for reading and writing attributes.
 The following datatypes are supported:
@@ -215,9 +216,9 @@ end program
 | `hdf5_write_attribute(ifile, location, attr_name, attribute)` | write attribute                      |
 | `hdf5_read_attribute(ifile, location, attr_name, variable)`   | read attribute                       |
 | `hdf5_get_number_attributes(ifile, location)`                 | get number of attributes             |
+| `hdf5_list_attributes(ifile, location, list)`                 | get list of attributes               |
 
 ## Future Features
 
-* `hdf5_list_attributes`
 * `hdf5_write_data(ifile, dname, data [,gzip])` with **manual** chunking.
-* Loading of partial data
+* `hdf5_read_partial_data`

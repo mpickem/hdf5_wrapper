@@ -35,6 +35,15 @@ program bla
 
   ! writing attributes
   call hdf5_write_attribute(ifile, 'group1', 'att1', 'string')
+  call hdf5_write_attribute(ifile, 'group1', 'att2', (1.0, 2.0))
+
+  call hdf5_list_attributes(ifile, 'group1', list)
+
+  if (allocated(list)) then
+    write(*,*) list
+    deallocate(list)
+  endif
+
   call hdf5_write_attribute(ifile, 'group1/group2', 'att2', 123)
   call hdf5_write_attribute(ifile, 'dataset1', 'att3', 1.22d-2)
 

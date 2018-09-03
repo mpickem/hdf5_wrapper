@@ -2874,33 +2874,27 @@ module hdf5_wrapper
     deallocate(members)
   end subroutine
 
-  ! subroutine hdf5_list_attributes(ifile, location)
-  !   integer(hid_t), intent(in)                  :: ifile
-  !   character(len=*), intent(in)                :: location
-  !   character(len=150), allocatable, dimension(:) :: attrs
+  subroutine hdf5_list_attributes(ifile, location, attrs)
+    integer(hid_t), intent(in)                  :: ifile
+    character(len=*), intent(in)                :: location
+    character(len=*), allocatable, dimension(:) :: attrs
 
-  !   integer :: nattrs
-  !   integer(hid_t) :: obj_id
-  !   integer :: idx
-  !   integer(size_t) :: buf_size = 0
-  !   integer(hid_t) :: lapl_id
-  !   character(len=150) :: strim
+    integer :: nattrs
+    integer(hid_t) :: obj_id
+    integer :: idx
+    character(len=150) :: strim
 
-  !   call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
-  !   call h5aget_num_attrs_f(obj_id, nattrs, hdf_err)
+    call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
+    call h5aget_num_attrs_f(obj_id, nattrs, hdf_err)
+    call h5oclose_f(obj_id, hdf_err)
 
-  !   if (nattrs .eq. 0) return
-  !   allocate(attrs(nattrs))
-  !   call h5pset_nlinks_f(lapl_id, int(0,size_t), hdf_err)
-  !   do idx= 0, nattrs-1
-  !     ! call h5aget_info_by_idx_f(ifile, trim(adjustl(location)), h5_index_name_f, &
-  !     !     h5_iter_inc_f, int(idx, hsize_t), f_corder_valid, corder, cset, data_size, hdf_err)
-  !     strim = NULL
-  !     call h5aget_name_by_idx_f(ifile, trim(adjustl(location)), h5_index_name_f, h5_iter_inc_f, int(idx, hsize_t), strim, buf_size, lapl_id, hdf_err)
-  !     write(*,*) trim(strim)
-  !   enddo
-
-  ! end subroutine
+    if (nattrs .eq. 0) return
+    allocate(attrs(nattrs))
+    do idx= 0, nattrs-1
+      call h5aget_name_by_idx_f(ifile, trim(adjustl(location)), h5_index_name_f, h5_iter_inc_f, int(idx, hsize_t), strim, hdf_err)
+      attrs(idx+1) = strim
+    enddo
+  end subroutine
 
   ! help function with separates /group1/group2/dset -> /group1/group2 and dset
   subroutine hdf5_help_separate_dsetname(dsetfull, gname, dset)
