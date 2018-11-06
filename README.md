@@ -19,7 +19,7 @@ For more detailed library information please refer to [[Libraries and tools refe
 ## Wrapper installation
 Compile the file `hdf5_wrapper.f90` with proper linking to your local `hdf5 `library.
 In your program use the binding `use hdf5_wrapper` to use the wrapper (see `test_example.f90`).
-A minimalistic compilation script can be found in `compile.sh`.
+A minimalistic compilation script can be found in `compile_gfortran.sh` and `compile_ifort.sh`.
 
 ## HDF5 interface and file handling
 
