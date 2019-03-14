@@ -39,6 +39,15 @@ program bla
 
   call hdf5_list_attributes(ifile, 'group1', list)
 
+
+  write(*,*) hdf5_group_exists(ifile, 'group1')
+  write(*,*) hdf5_group_exists(ifile, 'group1/group2')
+  write(*,*) hdf5_group_exists(ifile, 'group_which_does_not_exist')
+  write(*,*) hdf5_dataset_exists(ifile, 'group1')
+  write(*,*) hdf5_dataset_exists(ifile, 'dataset1')
+  write(*,*) hdf5_dataset_exists(ifile, 'dataset_which_does_not_exit')
+  write(*,*) hdf5_group_exists(ifile, 'dataset1')
+
   if (allocated(list)) then
     write(*,*) list
     deallocate(list)
