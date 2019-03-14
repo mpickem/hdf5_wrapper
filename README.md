@@ -24,11 +24,30 @@ A minimalistic compilation script can be found in `compile_gfortran.sh` and `com
 ## General thoughts
 This wrapper was written in such a way that the usage is as unix-like as possible.
 That means that the group and dataset access is done with the typical unix-like path formalism
-(.e.g. `/group1/group2` where the leading and trailing `/` are optional) similarly to `h5py` (my personal favorite Python hdf5 library).
+(.e.g. `/group1/group2` where the leading and trailing `/` are optional) similarly to the Python library `h5py`.
 The data read-in routines can be used by simply providing allocatable data arrays of the most commonly used datatypes in Fortran (see below).
 Please note that I did not include any dimension or datatype checks. While the majority of routines are subroutines (`call` keyword required)
 some are simple functions which either return `logical` or `integer` datatypes.
 These are marked accordingly at [Summary of commands](#Summary-of-commands).
+### Implicit data transposition
+Here I simply want to mention one of the biggest pitfalls when handling hdf5 files with Fortran, namely
+the implicit data transposition. Already when creating a simple file with a multidimensional dataset
+and looking at said file with an external tool (e.g. `h5ls -lr <filename>`) once notices that the
+dataset dimensions are turned upside down. That means if we, inside Fortran, create a three-dimensional dataset with a shape of `[ 4, 8, 2 ]`,
+inspecting it with `h5ls` will show a shape of `[ 2, 8, 4]`.
+
+This is not a bug and just simply illustrates
+the difference between the row-major order of C, Python, etc. and the column-major order of Fortran.
+When saving the dataset with Fortran it will be stored as the contiguous memory as Fortran sees it (column-major).
+When opening the same dataset with other tools this data will be interpreted as row-major which causes the full transposition
+of the dataset. This is what is known as an implicit data transposition about which one should always be mindful about
+especially when data pre-processing is handled with Python or other row-major languages.
+### A few handy commands
+As already mentioned, when inspecting hdf5 files from the shell `h5ls` (gets installed with the hdf5 installation) is a good tip.
+Here are some of my most commonly used commands:
+* `h5ls -lr`: (**r**)ecursively (**l**)ist all groups and datasets
+* `h5ls -vlr`: (**v**)erbosely and (**r**)ecursively (**l**)ist everything (this includes attributes, datatypes, etc.)
+* `h5ls -d`: inspect the (**d**)ata directly by simply appending the full unix-like path after the file without space (e.g. `file.hdf5/group1/dset`)
 
 ## HDF5 interface and file handling
 
