@@ -56,6 +56,9 @@ program bla
   call hdf5_write_attribute(ifile, 'group1/group2', 'att2', 123)
   call hdf5_write_attribute(ifile, 'dataset1', 'att3', 1.22d-2)
 
+  write(*,*) hdf5_attribute_exists(ifile, 'dataset1', 'att3')
+  write(*,*) hdf5_attribute_exists(ifile, 'dataset1', 'att_that_does_not_exit')
+
   call hdf5_delete_attribute(ifile, 'dataset1', 'att3')
 
   ! close the file again

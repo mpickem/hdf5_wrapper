@@ -2952,6 +2952,31 @@ module hdf5_wrapper
     call h5eset_auto_f(1,hdf_err) ! acitvate it again
   end function
 
+  logical function hdf5_attribute_exists(ifile, location, attrname)
+    integer(hid_t), intent(in)                  :: ifile
+    character(len=*), intent(in)                :: location
+    character(len=*), intent(in)                :: attrname
+
+    integer(hid_t) :: obj_id, attr_id
+
+    call h5eset_auto_f(0,hdf_err) ! deactivate error printing
+    call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
+    if (hdf_err .ne. 0) then
+      hdf5_attribute_exists = .false.
+    else
+      call h5aopen_f(obj_id, trim(adjustl(attrname)), attr_id, hdf_err)
+      if (hdf_err .ne. 0) then
+        hdf5_attribute_exists = .false.
+      else
+        call h5aclose_f(attr_id, hdf_err)
+        hdf5_attribute_exists = .true.
+      endif
+    endif
+
+    call h5eclear_f(hdf_err)      ! clear the error
+    call h5eset_auto_f(1,hdf_err) ! acitvate it again
+  end function
+
   ! help function with separates /group1/group2/dset -> /group1/group2 and dset
   subroutine hdf5_help_separate_dsetname(dsetfull, gname, dset)
     character(len=*), intent(in)    :: dsetfull
