@@ -135,6 +135,7 @@ The dataset functions work in the same way as the group functions. One can creat
 (unix-like) path where, again, the non-existent parent groups are created on the fly.
 We provide wrappers for the following datatypes for datasets:
 
+* `logical`
 * `integer(4)`
 * `real(4)`
 * `real(8)`
@@ -143,7 +144,12 @@ We provide wrappers for the following datatypes for datasets:
 
 The in/output can be done for `0D` to `7D` (Fortran maximum) arrays. The readin functions
 work the same way, only that we have to provide an allocatable array.
-Please note that there is no check for matching hdf5 and fortran datatypes.
+Since there is no native boolean (logical) datatype in HDF5 we save the data
+in form of `0`s and `1`s (integer). Reading into logical data structures works the same way:
+We get integer data from the HDF5 file where `0` will be transformed into `.false.` and any
+other number will be transformed into `.true.` (This means we can load general integer data structures
+into logical arrays).
+Please note that there is no check for matching hdf5 and Fortran datatypes.
 
 ```
 program datasets
@@ -193,6 +199,7 @@ end program
 We also provide a small interface for reading and writing attributes.
 The following datatypes are supported:
 
+* `logical`
 * `integer(4)`
 * `real(4)`
 * `real(8)`
@@ -202,6 +209,8 @@ The following datatypes are supported:
 
 Attributes can be attached to both groups and datasets. For this reason
 we do not create anything on the fly. Any non-existance of objects will cause an error.
+Please note here that the same logic which applies for `logical` datasets applies here as well
+(`.true.` and `.false.` will be transformed in `1` and `0` (integer))
 
 ```
 program attributes
