@@ -1376,13 +1376,34 @@ module hdf5_wrapper
     logical                      :: darray
 
     integer :: darrayi
+    integer(hid_t)               :: grp_id, dset_id, dspace_id
+    integer, parameter           :: rank = 0
+    integer(8), dimension(0)     :: dims
+
+    character(len=150) :: gname, dset
 
     if (darray) then
       darrayi = 1
     else
       darrayi = 0
     endif
-    call hdf5_write_data_0d_int4(ifile, dsetfull, darrayi)
+
+    call hdf5_help_separate_dsetname(dsetfull, gname, dset)
+    call hdf5_create_group(ifile, gname, iforce_error=.false.)
+
+    if (trim(adjustl(gname)) == '') then
+      grp_id = ifile
+    else
+      call h5gopen_f(ifile, trim(adjustl(gname)), grp_id, hdf_err)
+    endif
+    call h5screate_simple_f(0, dims, dspace_id, hdf_err)
+    call h5dcreate_f(grp_id, trim(adjustl(dset)), logical_id, dspace_id, dset_id, hdf_err)
+    call h5dwrite_f(dset_id, logical_id, darrayi, dims, hdf_err)
+    call h5dclose_f(dset_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    if (grp_id .ne. ifile) then
+      call h5gclose_f(grp_id, hdf_err)
+    endif
   end subroutine hdf5_write_data_0d_logical
 
   subroutine hdf5_write_data_1d_logical(ifile, dsetfull, darray)
@@ -1391,8 +1412,14 @@ module hdf5_wrapper
     logical, dimension(:)        :: darray
 
     integer(4), allocatable      :: darrayi(:)
-    integer(8), dimension(1)     :: dims
     integer                      :: a
+
+    integer(hid_t)                 :: grp_id, dset_id, dspace_id
+    integer(hsize_t), dimension(1) :: dset_dims, dset_maxdims
+    integer, parameter             :: rank = 1
+    integer(8), dimension(1)       :: dims
+
+    character(len=150) :: gname, dset
 
     dims(1) = size(darray,1)
     allocate(darrayi(dims(1)))
@@ -1403,7 +1430,24 @@ module hdf5_wrapper
         darrayi(a) = 0
       endif
     enddo
-    call hdf5_write_data_1d_int4(ifile, dsetfull, darrayi)
+
+    call hdf5_help_separate_dsetname(dsetfull, gname, dset)
+    call hdf5_create_group(ifile, gname, iforce_error=.false.)
+
+    if (trim(adjustl(gname)) == '') then
+      grp_id = ifile
+    else
+      call h5gopen_f(ifile, trim(adjustl(gname)), grp_id, hdf_err)
+    endif
+    call h5screate_f(h5s_simple_f, dspace_id, hdf_err)
+    call h5sset_extent_simple_f(dspace_id, rank, dims, dims, hdf_err)
+    call h5dcreate_f(grp_id, trim(adjustl(dset)), logical_id, dspace_id, dset_id, hdf_err)
+    call h5dwrite_f(dset_id, logical_id, darrayi, dims, hdf_err)
+    call h5dclose_f(dset_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    if (grp_id .ne. ifile) then
+      call h5gclose_f(grp_id, hdf_err)
+    endif
     deallocate(darrayi)
   end subroutine hdf5_write_data_1d_logical
 
@@ -1413,8 +1457,14 @@ module hdf5_wrapper
     logical, dimension(:,:)      :: darray
 
     integer(4), allocatable      :: darrayi(:,:)
-    integer(8), dimension(2)     :: dims
     integer                      :: a,b
+
+    integer(hid_t)                 :: grp_id, dset_id, dspace_id
+    integer(hsize_t), dimension(2) :: dset_dims, dset_maxdims
+    integer, parameter             :: rank = 2
+    integer(8), dimension(2)       :: dims
+
+    character(len=150) :: gname, dset
 
     dims(1) = size(darray,1)
     dims(2) = size(darray,2)
@@ -1428,7 +1478,24 @@ module hdf5_wrapper
       endif
     enddo
     enddo
-    call hdf5_write_data_2d_int4(ifile, dsetfull, darrayi)
+
+    call hdf5_help_separate_dsetname(dsetfull, gname, dset)
+    call hdf5_create_group(ifile, gname, iforce_error=.false.)
+
+    if (trim(adjustl(gname)) == '') then
+      grp_id = ifile
+    else
+      call h5gopen_f(ifile, trim(adjustl(gname)), grp_id, hdf_err)
+    endif
+    call h5screate_f(h5s_simple_f, dspace_id, hdf_err)
+    call h5sset_extent_simple_f(dspace_id, rank, dims, dims, hdf_err)
+    call h5dcreate_f(grp_id, trim(adjustl(dset)), logical_id, dspace_id, dset_id, hdf_err)
+    call h5dwrite_f(dset_id, logical_id, darrayi, dims, hdf_err)
+    call h5dclose_f(dset_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    if (grp_id .ne. ifile) then
+      call h5gclose_f(grp_id, hdf_err)
+    endif
     deallocate(darrayi)
   end subroutine hdf5_write_data_2d_logical
 
@@ -1440,6 +1507,12 @@ module hdf5_wrapper
     integer(4), allocatable      :: darrayi(:,:,:)
     integer(8), dimension(3)     :: dims
     integer                      :: a,b,c
+
+    integer(hid_t)                 :: grp_id, dset_id, dspace_id
+    integer(hsize_t), dimension(3) :: dset_dims, dset_maxdims
+    integer, parameter             :: rank = 3
+
+    character(len=150) :: gname, dset
 
     dims(1) = size(darray,1)
     dims(2) = size(darray,2)
@@ -1456,7 +1529,24 @@ module hdf5_wrapper
     enddo
     enddo
     enddo
-    call hdf5_write_data_3d_int4(ifile, dsetfull, darrayi)
+
+    call hdf5_help_separate_dsetname(dsetfull, gname, dset)
+    call hdf5_create_group(ifile, gname, iforce_error=.false.)
+
+    if (trim(adjustl(gname)) == '') then
+      grp_id = ifile
+    else
+      call h5gopen_f(ifile, trim(adjustl(gname)), grp_id, hdf_err)
+    endif
+    call h5screate_f(h5s_simple_f, dspace_id, hdf_err)
+    call h5sset_extent_simple_f(dspace_id, rank, dims, dims, hdf_err)
+    call h5dcreate_f(grp_id, trim(adjustl(dset)), logical_id, dspace_id, dset_id, hdf_err)
+    call h5dwrite_f(dset_id, logical_id, darrayi, dims, hdf_err)
+    call h5dclose_f(dset_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    if (grp_id .ne. ifile) then
+      call h5gclose_f(grp_id, hdf_err)
+    endif
     deallocate(darrayi)
   end subroutine hdf5_write_data_3d_logical
 
@@ -1466,8 +1556,14 @@ module hdf5_wrapper
     logical, dimension(:,:,:,:)  :: darray
 
     integer(4), allocatable      :: darrayi(:,:,:,:)
-    integer(8), dimension(4)     :: dims
     integer                      :: a,b,c,d
+
+    integer(hid_t)                 :: grp_id, dset_id, dspace_id
+    integer(hsize_t), dimension(4) :: dset_dims, dset_maxdims
+    integer, parameter             :: rank = 4
+    integer(8), dimension(4)       :: dims
+
+    character(len=150) :: gname, dset
 
     dims(1) = size(darray,1)
     dims(2) = size(darray,2)
@@ -1487,7 +1583,24 @@ module hdf5_wrapper
     enddo
     enddo
     enddo
-    call hdf5_write_data_4d_int4(ifile, dsetfull, darrayi)
+
+    call hdf5_help_separate_dsetname(dsetfull, gname, dset)
+    call hdf5_create_group(ifile, gname, iforce_error=.false.)
+
+    if (trim(adjustl(gname)) == '') then
+      grp_id = ifile
+    else
+      call h5gopen_f(ifile, trim(adjustl(gname)), grp_id, hdf_err)
+    endif
+    call h5screate_f(h5s_simple_f, dspace_id, hdf_err)
+    call h5sset_extent_simple_f(dspace_id, rank, dims, dims, hdf_err)
+    call h5dcreate_f(grp_id, trim(adjustl(dset)), logical_id, dspace_id, dset_id, hdf_err)
+    call h5dwrite_f(dset_id, logical_id, darrayi, dims, hdf_err)
+    call h5dclose_f(dset_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    if (grp_id .ne. ifile) then
+      call h5gclose_f(grp_id, hdf_err)
+    endif
     deallocate(darrayi)
   end subroutine hdf5_write_data_4d_logical
 
@@ -1497,8 +1610,14 @@ module hdf5_wrapper
     logical, dimension(:,:,:,:,:) :: darray
 
     integer(4), allocatable       :: darrayi(:,:,:,:,:)
-    integer(8), dimension(5)      :: dims
     integer                       :: a,b,c,d,e
+
+    integer(hid_t)                   :: grp_id, dset_id, dspace_id
+    integer(hsize_t), dimension(5)   :: dset_dims, dset_maxdims
+    integer, parameter               :: rank = 5
+    integer(8), dimension(5)         :: dims
+
+    character(len=150) :: gname, dset
 
     dims(1) = size(darray,1)
     dims(2) = size(darray,2)
@@ -1521,7 +1640,23 @@ module hdf5_wrapper
     enddo
     enddo
     enddo
-    call hdf5_write_data_5d_int4(ifile, dsetfull, darrayi)
+    call hdf5_help_separate_dsetname(dsetfull, gname, dset)
+    call hdf5_create_group(ifile, gname, iforce_error=.false.)
+
+    if (trim(adjustl(gname)) == '') then
+      grp_id = ifile
+    else
+      call h5gopen_f(ifile, trim(adjustl(gname)), grp_id, hdf_err)
+    endif
+    call h5screate_f(h5s_simple_f, dspace_id, hdf_err)
+    call h5sset_extent_simple_f(dspace_id, rank, dims, dims, hdf_err)
+    call h5dcreate_f(grp_id, trim(adjustl(dset)), logical_id, dspace_id, dset_id, hdf_err)
+    call h5dwrite_f(dset_id, logical_id, darrayi, dims, hdf_err)
+    call h5dclose_f(dset_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    if (grp_id .ne. ifile) then
+      call h5gclose_f(grp_id, hdf_err)
+    endif
     deallocate(darrayi)
   end subroutine hdf5_write_data_5d_logical
 
@@ -1531,8 +1666,14 @@ module hdf5_wrapper
     logical, dimension(:,:,:,:,:,:) :: darray
 
     integer(4), allocatable         :: darrayi(:,:,:,:,:,:)
-    integer(8), dimension(6)        :: dims
     integer                         :: a,b,c,d,e,f
+
+    integer(hid_t)                     :: grp_id, dset_id, dspace_id
+    integer(hsize_t), dimension(6)     :: dset_dims, dset_maxdims
+    integer, parameter                 :: rank = 6
+    integer(8), dimension(6)           :: dims
+
+    character(len=150) :: gname, dset
 
     dims(1) = size(darray,1)
     dims(2) = size(darray,2)
@@ -1558,7 +1699,24 @@ module hdf5_wrapper
     enddo
     enddo
     enddo
-    call hdf5_write_data_6d_int4(ifile, dsetfull, darrayi)
+
+    call hdf5_help_separate_dsetname(dsetfull, gname, dset)
+    call hdf5_create_group(ifile, gname, iforce_error=.false.)
+
+    if (trim(adjustl(gname)) == '') then
+      grp_id = ifile
+    else
+      call h5gopen_f(ifile, trim(adjustl(gname)), grp_id, hdf_err)
+    endif
+    call h5screate_f(h5s_simple_f, dspace_id, hdf_err)
+    call h5sset_extent_simple_f(dspace_id, rank, dims, dims, hdf_err)
+    call h5dcreate_f(grp_id, trim(adjustl(dset)), logical_id, dspace_id, dset_id, hdf_err)
+    call h5dwrite_f(dset_id, logical_id, darrayi, dims, hdf_err)
+    call h5dclose_f(dset_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    if (grp_id .ne. ifile) then
+      call h5gclose_f(grp_id, hdf_err)
+    endif
     deallocate(darrayi)
   end subroutine hdf5_write_data_6d_logical
 
@@ -1568,8 +1726,14 @@ module hdf5_wrapper
     logical, dimension(:,:,:,:,:,:,:) :: darray
 
     integer(4), allocatable           :: darrayi(:,:,:,:,:,:,:)
-    integer(8), dimension(7)          :: dims
     integer                           :: a,b,c,d,e,f,g
+
+    integer(hid_t)                       :: grp_id, dset_id, dspace_id
+    integer(hsize_t), dimension(7)       :: dset_dims, dset_maxdims
+    integer, parameter                   :: rank = 7
+    integer(8), dimension(7)             :: dims
+
+    character(len=150) :: gname, dset
 
     dims(1) = size(darray,1)
     dims(2) = size(darray,2)
@@ -1598,7 +1762,23 @@ module hdf5_wrapper
     enddo
     enddo
     enddo
-    call hdf5_write_data_7d_int4(ifile, dsetfull, darrayi)
+    call hdf5_help_separate_dsetname(dsetfull, gname, dset)
+    call hdf5_create_group(ifile, gname, iforce_error=.false.)
+
+    if (trim(adjustl(gname)) == '') then
+      grp_id = ifile
+    else
+      call h5gopen_f(ifile, trim(adjustl(gname)), grp_id, hdf_err)
+    endif
+    call h5screate_f(h5s_simple_f, dspace_id, hdf_err)
+    call h5sset_extent_simple_f(dspace_id, rank, dims, dims, hdf_err)
+    call h5dcreate_f(grp_id, trim(adjustl(dset)), logical_id, dspace_id, dset_id, hdf_err)
+    call h5dwrite_f(dset_id, logical_id, darrayi, dims, hdf_err)
+    call h5dclose_f(dset_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    if (grp_id .ne. ifile) then
+      call h5gclose_f(grp_id, hdf_err)
+    endif
     deallocate(darrayi)
   end subroutine hdf5_write_data_7d_logical
 
