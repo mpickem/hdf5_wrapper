@@ -42,7 +42,7 @@ program bla
   call hdf5_write_data(ifile, 'dataset_logical', arr_logical)
   deallocate(arr_logical)
 
-  call hdf5_write_data(ifile, 'dataset_integer', 0)
+  call hdf5_write_data(ifile, 'dataset_integer', .false.)
   call hdf5_read_data(ifile, 'dataset_integer', d) ! read into logical
   write(*,*) d
 
