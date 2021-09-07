@@ -5,6 +5,7 @@ module hdf5_wrapper
   integer         :: hdf_err
   integer(hid_t)  :: complex_id_dp, complex_id_sp
   integer(hid_t)  :: complex_id_r_dp, complex_id_i_dp, complex_id_r_sp, complex_id_i_sp
+  integer(hid_t)  :: logical_id
 
   interface hdf5_read_data
     module procedure hdf5_read_data_0d_logical, &
@@ -133,6 +134,7 @@ module hdf5_wrapper
   subroutine hdf5_init()
     call h5open_f(hdf_err)
     call hdf5_create_complex_datatype()
+    call hdf5_create_logical_datatype()
   end subroutine hdf5_init
 
   subroutine hdf5_finalize()
@@ -311,6 +313,18 @@ module hdf5_wrapper
     call h5tinsert_f(complex_id_i_sp, "i", zero, h5t_native_real, hdf_err)
     call h5pclose_f(plist_id, hdf_err)
   end subroutine hdf5_create_complex_datatype
+
+  subroutine hdf5_create_logical_datatype()
+    integer, parameter :: zero = 0
+    integer, parameter :: one = 1
+    integer(size_t) :: type_sized
+
+    call h5tget_size_f(h5t_native_b8, type_sized, hdf_err) ! h5py uses numpy 1-byte bool
+    call h5tcreate_f(h5t_enum_f, type_sized, logical_id, hdf_err)
+    call h5tenum_insert_f(logical_id, "FALSE", zero, hdf_err)
+    call h5tenum_insert_f(logical_id, "TRUE", one, hdf_err)
+
+  end subroutine hdf5_create_logical_datatype
 
   integer function hdf5_get_dimensions(ifile, dset)
     integer(hid_t), intent(in)   :: ifile
@@ -3001,13 +3015,23 @@ module hdf5_wrapper
     character(len=*), intent(in) :: attrname
     logical                      :: attr
 
-    integer :: attri
+    integer(8), dimension(0)     :: dims
+    integer(hid_t) :: obj_id, dspace_id, attr_id
+
+    call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
+    call h5screate_simple_f(0, dims, dspace_id, hdf_err)
+    call h5acreate_f(obj_id, trim(adjustl(attrname)), logical_id, dspace_id, attr_id, hdf_err)
+
     if (attr) then
-      attri = 1
+      call h5awrite_f(attr_id, logical_id, 0, dims, hdf_err)
     else
-      attri = 0
+      call h5awrite_f(attr_id, logical_id, 1, dims, hdf_err)
     endif
-    call hdf5_write_attribute_int4(ifile, location, attrname, attri)
+
+    call h5aclose_f(attr_id, hdf_err)
+    call h5sclose_f(dspace_id, hdf_err)
+    call h5oclose_f(obj_id, hdf_err)
+
   end subroutine
 
   subroutine hdf5_write_attribute_int4(ifile, location, attrname, attr)
@@ -3139,9 +3163,16 @@ module hdf5_wrapper
     character(len=*), intent(in) :: attrname
     logical, intent(out)         :: attr
 
-    integer(4) :: attri
+    integer :: attri
+    integer(8), dimension(0)     :: dims
+    integer(hid_t) :: obj_id, dspace_id, attr_id
 
-    call hdf5_read_attribute_int4(ifile, location, attrname, attri)
+    call h5oopen_f(ifile, trim(adjustl(location)), obj_id, hdf_err)
+    call h5aopen_f(obj_id, trim(adjustl(attrname)), attr_id, hdf_err)
+    call h5aread_f(attr_id, logical_id, attri, dims, hdf_err)
+    call h5aclose_f(attr_id, hdf_err)
+    call h5oclose_f(obj_id, hdf_err)
+
     if (attri == 0) then
       attr = .false.
     else
