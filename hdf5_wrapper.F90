@@ -1,3 +1,15 @@
+! MIT License
+! https://github.com/mpickem/hdf5_wrapper
+
+! Copyright (c) 2018,2019,2021 Matthias Pickem
+
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+
 module hdf5_wrapper
   use hdf5
   implicit none
@@ -6,6 +18,11 @@ module hdf5_wrapper
   integer(hid_t)  :: complex_id_dp, complex_id_sp
   integer(hid_t)  :: complex_id_r_dp, complex_id_i_dp, complex_id_r_sp, complex_id_i_sp
   integer(hid_t)  :: logical_id
+#ifdef __INTEL_COMPILER
+  integer, parameter :: logical_size = 1
+#else
+  integer, parameter :: logical_size = 4
+#endif
 
   interface hdf5_read_data
     module procedure hdf5_read_data_0d_logical, &
@@ -370,7 +387,7 @@ module hdf5_wrapper
     character(len=*), intent(in) :: dset
     logical                      :: darray
 
-    integer(4)                   :: darrayi
+    integer(logical_size)        :: darrayi
 
     integer(hid_t) :: dset_id
     integer(hsize_t), dimension(0) :: dset_dims
@@ -391,7 +408,7 @@ module hdf5_wrapper
     character(len=*), intent(in)       :: dset
     logical, allocatable, dimension(:) :: darray
 
-    integer(4), allocatable            :: darrayi(:)
+    integer(logical_size), allocatable :: darrayi(:)
     integer(8), dimension(1)           :: dims
     integer                            :: a
 
@@ -423,8 +440,7 @@ module hdf5_wrapper
     character(len=*), intent(in)         :: dset
     logical, allocatable, dimension(:,:) :: darray
 
-    ! integer(4), allocatable              :: darrayi(:,:)
-    integer(4), allocatable              :: darrayi(:,:)
+    integer(logical_size), allocatable   :: darrayi(:,:)
     integer(8), dimension(2)             :: dims
     integer                              :: a,b
 
@@ -459,7 +475,7 @@ module hdf5_wrapper
     character(len=*), intent(in)           :: dset
     logical, allocatable, dimension(:,:,:) :: darray
 
-    integer(4), allocatable                :: darrayi(:,:,:)
+    integer(logical_size), allocatable     :: darrayi(:,:,:)
     integer(8), dimension(3)               :: dims
     integer                                :: a,b,c
 
@@ -497,7 +513,7 @@ module hdf5_wrapper
     character(len=*), intent(in)             :: dset
     logical, allocatable, dimension(:,:,:,:) :: darray
 
-    integer(4), allocatable                  :: darrayi(:,:,:,:)
+    integer(logical_size), allocatable       :: darrayi(:,:,:,:)
     integer(8), dimension(4)                 :: dims
     integer                                  :: a,b,c,d
 
@@ -538,7 +554,7 @@ module hdf5_wrapper
     character(len=*), intent(in)               :: dset
     logical, allocatable, dimension(:,:,:,:,:) :: darray
 
-    integer(4), allocatable                    :: darrayi(:,:,:,:,:)
+    integer(logical_size), allocatable         :: darrayi(:,:,:,:,:)
     integer(8), dimension(5)                   :: dims
     integer                                    :: a,b,c,d,e
 
@@ -582,7 +598,7 @@ module hdf5_wrapper
     character(len=*), intent(in)                 :: dset
     logical, allocatable, dimension(:,:,:,:,:,:) :: darray
 
-    integer(4), allocatable                      :: darrayi(:,:,:,:,:,:)
+    integer(logical_size), allocatable           :: darrayi(:,:,:,:,:,:)
     integer(8), dimension(6)                     :: dims
     integer                                      :: a,b,c,d,e,f
 
@@ -629,7 +645,7 @@ module hdf5_wrapper
     character(len=*), intent(in)                   :: dset
     logical, allocatable, dimension(:,:,:,:,:,:,:) :: darray
 
-    integer(4), allocatable                        :: darrayi(:,:,:,:,:,:,:)
+    integer(logical_size), allocatable             :: darrayi(:,:,:,:,:,:,:)
     integer(8), dimension(7)                       :: dims
     integer                                        :: a,b,c,d,e,f,g
 
