@@ -208,7 +208,7 @@ We also provide a small interface for reading and writing attributes.
 The following datatypes are supported:
 
 * `logical`
-* `integer(4)`
+* `integer`
 * `real(4)`
 * `real(8)`
 * `complex(4)`
@@ -216,7 +216,7 @@ The following datatypes are supported:
 * `character(len=*)`
 
 Attributes can be attached to both groups and datasets. For this reason
-we forgo parent group creation. Any non-existance of objects will trigger an error.
+we forgo automatic parent group creation. Any non-existance of objects will trigger an error.
 Please note that the written strings will be byte strings within Python.
 
 ```
@@ -224,7 +224,7 @@ program attributes
 	use hdf5
 	use hdf5_wrapper
 
-	integer(4) :: x = 3
+	integer    :: x = 3
 	real(8)    :: y
 
 	call hdf5_init()
