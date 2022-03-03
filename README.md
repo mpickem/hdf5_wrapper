@@ -1,6 +1,7 @@
 # HDF5 wrapper
 ## HDF5 Installation
 Download the tar ball from the [official homepage](http://portal.hdfgroup.org/display/support).
+Make sure to always use the latest version (currently: 1.13.0). Older versions (1.8 and below) may result in unintentional problems, especially with non-native datatypes like `logical`.
 Installation for e.g. gnu compiler is done via
 
 ```
@@ -17,33 +18,33 @@ make install
 For more detailed library information please refer to [[Libraries and tools reference]](http://portal.hdfgroup.org/display/HDF5/Libraries+and+Tools+Reference).
 
 ## Wrapper installation
-Compile the file `hdf5_wrapper.f90` with proper linking to your local `hdf5 `library.
+Compile the file `hdf5_wrapper.F90` with proper linking to your local `hdf5` library.
 In your program use the binding `use hdf5_wrapper` to use the wrapper (see `test_example.f90`).
 A minimalistic compilation script can be found in `compile_gfortran.sh` and `compile_ifort.sh`.
 
 ## General thoughts
-This wrapper was written in such a way that the usage is as unix-like as possible.
-That means that the group and dataset access is done with the typical unix-like path formalism
-(.e.g. `/group1/group2` where the leading and trailing `/` are optional) similarly to the Python library `h5py`.
+This wrapper tries to mimic unix-like pathing wherever possible.
+Group and dataset access is done with the typical unix-like path formalism
+(e.g. `/group1/group2` where the leading and trailing `/` are optional) similarly to the Python library `h5py`.
 The data read-in routines can be used by simply providing allocatable data arrays of the most commonly used datatypes in Fortran (see below).
 Please note that I did not include any dimension or datatype checks. While the majority of routines are subroutines (`call` keyword required)
 some are simple functions which either return `logical` or `integer` datatypes.
-These are marked accordingly at [Summary of commands](#Summary-of-commands).
+These are marked accordingly in [Summary of commands](#Summary-of-commands).
 ### Implicit data transposition
 Here I simply want to mention one of the biggest pitfalls when handling hdf5 files with Fortran, namely
 the implicit data transposition. Already when creating a simple file with a multidimensional dataset
-and looking at said file with an external tool (e.g. `h5ls -lr <filename>`) once notices that the
-dataset dimensions are turned upside down. That means if we, inside Fortran, create a three-dimensional dataset with a shape of `[ 4, 8, 2 ]`,
+and looking at said file with an external tool (e.g. `h5ls -lr <filename>`) one notices that the
+dataset dimensions are reversed. That means if we, inside Fortran, create a three-dimensional dataset with a shape of `[ 4, 8, 2 ]`,
 inspecting it with `h5ls` will show a shape of `[ 2, 8, 4]`.
 
-This is not a bug and just simply illustrates
+This is not a bug and simply illustrates
 the difference between the row-major order of C, Python, etc. and the column-major order of Fortran.
 When saving the dataset with Fortran it will be stored as the contiguous memory as Fortran sees it (column-major).
-When opening the same dataset with other tools this data will be interpreted as row-major which causes the full transposition
-of the dataset. This is what is known as an implicit data transposition about which one should always be mindful about
-especially when data pre-processing is handled with Python or other row-major languages.
+Opening the same dataset with other tools this data will be interpreted as row-major which causes the full transposition
+of the dataset. This implicit data transposition is important to keep in mind when handling Fortran in combination
+with other row-major languages
 ### A few handy commands
-As already mentioned, when inspecting hdf5 files from the shell `h5ls` (gets installed with the hdf5 installation) is a good tip.
+As already mentioned, when inspecting hdf5 files from the shell `h5ls` (installed with the hdf5 installation) is a good tip.
 Here are some of my most commonly used commands:
 * `h5ls -lr`: (**r**)ecursively (**l**)ist all groups and datasets
 * `h5ls -vlr`: (**v**)erbosely and (**r**)ecursively (**l**)ist everything (this includes attributes, datatypes, etc.)
@@ -136,20 +137,27 @@ The dataset functions work in the same way as the group functions. One can creat
 We provide wrappers for the following datatypes for datasets:
 
 * `logical`
-* `integer(4)`
+* `integer`
 * `real(4)`
 * `real(8)`
 * `complex(4)`
 * `complex(8)`
 
-The in/output can be done for `0D` to `7D` (Fortran maximum) arrays. The readin functions
-work the same way, only that we have to provide an allocatable array.
-Since there is no native boolean (logical) datatype in HDF5 we save the data
-in form of `0`s and `1`s (integer). Reading into logical data structures works the same way:
-We get integer data from the HDF5 file where `0` will be transformed into `.false.` and any
-other number will be transformed into `.true.` (This means we can load general integer data structures
-into logical arrays).
-Please note that there is no check for matching hdf5 and Fortran datatypes.
+The in/output is supported for all possible `0D` to `7D` (Fortran maximum) arrays. The readin functions
+work the same way, only that we have to provide an allocatable array with the matching dimensionality instead.
+Please note that there is neither a check for matching datatypes nor a check for matching dimensions.
+From the above list HDF5 natively supports only `integer`, `real(4)`, and `real(8)`. `logical`, `complex(4)`,
+and `complex(8)` on the other hand must be constructed manually. In order to achieve maximum compatibility
+with `h5py` ([supported datatypes](https://docs.h5py.org/en/stable/faq.html)) I employed the identical structures:
+
+| hdf5 datatype   | internal                                      |
+| --------------- | --------------------------------------------- |
+| `logical`       | h5t_native_integer                            |
+| `integer`       | HDF5 enum (0: FALSE, 1: TRUE) - h5t_native_b8 |
+| `real(4)`       | h5t_native_real                               |
+| `real(8)`       | h5t_native_double                             |
+| `complex(4)`    | HDF5 struct ("r", "i") - h5t_native_real      |
+| `complex(8)`    | HDF5 struct ("r", "i") - h5t_native_double    |
 
 ```
 program datasets
@@ -208,9 +216,8 @@ The following datatypes are supported:
 * `character(len=*)`
 
 Attributes can be attached to both groups and datasets. For this reason
-we do not create anything on the fly. Any non-existance of objects will cause an error.
-Please note here that the same logic which applies for `logical` datasets applies here as well
-(`.true.` and `.false.` will be transformed in `1` and `0` (integer))
+we forgo parent group creation. Any non-existance of objects will trigger an error.
+Please note that the written strings will be byte strings within Python.
 
 ```
 program attributes
@@ -275,8 +282,3 @@ Deletion of datasets and groups is internally done simply by unlinking the objec
 | `hdf5_list_attributes(ifile, location, list)`                 | get list of attributes               | -             |
 | `hdf5_delete(ifile, location)`                                | delete group/dataset                 | -             |
 | `hdf5_delete_attribute(ifile, location, attr_name)`           | delete attribute                     | -             |
-
-## Future Features
-
-* `hdf5_write_data(ifile, dname, data [,gzip])` with **manual** chunking.
-* `hdf5_read_partial_data`

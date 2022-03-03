@@ -1,7 +1,7 @@
 ! MIT License
 ! https://github.com/mpickem/hdf5_wrapper
 
-! Copyright (c) 2018,2019,2021 Matthias Pickem
+! Copyright (c) 2018,2019,2021,2022 Matthias Pickem
 
 ! Permission is hereby granted, free of charge, to any person obtaining a copy
 ! of this software and associated documentation files (the "Software"), to deal
@@ -18,11 +18,7 @@ module hdf5_wrapper
   integer(hid_t)  :: complex_id_dp, complex_id_sp
   integer(hid_t)  :: complex_id_r_dp, complex_id_i_dp, complex_id_r_sp, complex_id_i_sp
   integer(hid_t)  :: logical_id
-#ifdef __INTEL_COMPILER
   integer, parameter :: logical_size = 1
-#else
-  integer, parameter :: logical_size = 4
-#endif
 
   interface hdf5_read_data
     module procedure hdf5_read_data_0d_logical, &

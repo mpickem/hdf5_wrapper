@@ -86,19 +86,22 @@ program bla
 
 
   write(*,*) 'Checking existence of written gropus / datasets / attributes'
-  write(*,*) hdf5_group_exists(ifile, 'group1')
-  write(*,*) hdf5_group_exists(ifile, 'group1/group2')
-  write(*,*) hdf5_group_exists(ifile, 'group_which_does_not_exist')
-  write(*,*) hdf5_dataset_exists(ifile, 'group1')
-  write(*,*) hdf5_dataset_exists(ifile, 'dataset_logial')
-  write(*,*) hdf5_dataset_exists(ifile, 'dataset_which_does_not_exit')
-  write(*,*) hdf5_group_exists(ifile, 'dataset_logical')
-  write(*,*) hdf5_attribute_exists(ifile, 'dataset_logical', 'att3')
-  write(*,*) hdf5_attribute_exists(ifile, 'dataset_logical', 'att_that_does_not_exit')
+  write(*,*) 'required: actual value'
+  write(*,*) 'T: ', hdf5_group_exists(ifile, 'group1')
+  write(*,*) 'T: ', hdf5_group_exists(ifile, 'group1/group2')
+  write(*,*) 'F: ', hdf5_group_exists(ifile, 'group_which_does_not_exist')
+  write(*,*) 'F: ', hdf5_dataset_exists(ifile, 'group1')
+  write(*,*) 'T: ', hdf5_dataset_exists(ifile, 'dataset_logical')
+  write(*,*) 'F: ', hdf5_dataset_exists(ifile, 'dataset_which_does_not_exit')
+  write(*,*) 'F: ', hdf5_group_exists(ifile, 'dataset_logical')
+  write(*,*) 'T: ', hdf5_attribute_exists(ifile, 'dataset_logical', 'att3')
+  write(*,*) 'F: ', hdf5_attribute_exists(ifile, 'dataset_logical', 'att_that_does_not_exit')
 
 
   write(*,*) 'Deleting attribute'
+  write(*,*) 'before - T: ', hdf5_attribute_exists(ifile, 'dataset_logical', 'att3')
   call hdf5_delete_attribute(ifile, 'dataset_logical', 'att3')
+  write(*,*) 'after  - F: ', hdf5_attribute_exists(ifile, 'dataset_logical', 'att3')
 
   write(*,*) 'Closing file'
   call hdf5_close_file(ifile)
