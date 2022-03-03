@@ -148,12 +148,12 @@ work the same way, only that we have to provide an allocatable array with the ma
 Please note that there is neither a check for matching datatypes nor a check for matching dimensions.
 From the above list HDF5 natively supports only `integer`, `real(4)`, and `real(8)`. `logical`, `complex(4)`,
 and `complex(8)` on the other hand must be constructed manually. In order to achieve maximum compatibility
-with `h5py` ([supported datatypes](https://docs.h5py.org/en/stable/faq.html)) I employed the identical structures:
+with `h5py` ([supported datatypes](https://docs.h5py.org/en/stable/faq.html#what-datatypes-are-supported)) I employed the identical structures:
 
 | hdf5 datatype   | internal                                      |
 | --------------- | --------------------------------------------- |
-| `logical`       | h5t_native_integer                            |
-| `integer`       | HDF5 enum (0: FALSE, 1: TRUE) - h5t_native_b8 |
+| `logical`       | HDF5 enum (0: FALSE, 1: TRUE) - h5t_native_b8 |
+| `integer`       | h5t_native_integer                            |
 | `real(4)`       | h5t_native_real                               |
 | `real(8)`       | h5t_native_double                             |
 | `complex(4)`    | HDF5 struct ("r", "i") - h5t_native_real      |
