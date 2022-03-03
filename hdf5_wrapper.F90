@@ -1461,7 +1461,7 @@ module hdf5_wrapper
     character(len=*), intent(in) :: dsetfull
     logical                      :: darray
 
-    integer :: darrayi
+    integer(logical_size)        :: darrayi
     integer(hid_t)               :: grp_id, dset_id, dspace_id
     integer, parameter           :: rank = 0
     integer(8), dimension(0)     :: dims
@@ -1493,12 +1493,12 @@ module hdf5_wrapper
   end subroutine hdf5_write_data_0d_logical
 
   subroutine hdf5_write_data_1d_logical(ifile, dsetfull, darray)
-    integer(hid_t), intent(in)   :: ifile
-    character(len=*), intent(in) :: dsetfull
-    logical, dimension(:)        :: darray
+    integer(hid_t), intent(in)         :: ifile
+    character(len=*), intent(in)       :: dsetfull
+    logical, dimension(:)              :: darray
 
-    integer(4), allocatable      :: darrayi(:)
-    integer                      :: a
+    integer(logical_size), allocatable :: darrayi(:)
+    integer                            :: a
 
     integer(hid_t)                 :: grp_id, dset_id, dspace_id
     integer(hsize_t), dimension(1) :: dset_dims, dset_maxdims
@@ -1538,12 +1538,12 @@ module hdf5_wrapper
   end subroutine hdf5_write_data_1d_logical
 
   subroutine hdf5_write_data_2d_logical(ifile, dsetfull, darray)
-    integer(hid_t), intent(in)   :: ifile
-    character(len=*), intent(in) :: dsetfull
-    logical, dimension(:,:)      :: darray
+    integer(hid_t), intent(in)         :: ifile
+    character(len=*), intent(in)       :: dsetfull
+    logical, dimension(:,:)            :: darray
 
-    integer(4), allocatable      :: darrayi(:,:)
-    integer                      :: a,b
+    integer(logical_size), allocatable :: darrayi(:,:)
+    integer                            :: a,b
 
     integer(hid_t)                 :: grp_id, dset_id, dspace_id
     integer(hsize_t), dimension(2) :: dset_dims, dset_maxdims
@@ -1586,13 +1586,13 @@ module hdf5_wrapper
   end subroutine hdf5_write_data_2d_logical
 
   subroutine hdf5_write_data_3d_logical(ifile, dsetfull, darray)
-    integer(hid_t), intent(in)   :: ifile
-    character(len=*), intent(in) :: dsetfull
-    logical, dimension(:,:,:)    :: darray
+    integer(hid_t), intent(in)         :: ifile
+    character(len=*), intent(in)       :: dsetfull
+    logical, dimension(:,:,:)          :: darray
 
-    integer(4), allocatable      :: darrayi(:,:,:)
-    integer(8), dimension(3)     :: dims
-    integer                      :: a,b,c
+    integer(logical_size), allocatable :: darrayi(:,:,:)
+    integer(8), dimension(3)           :: dims
+    integer                            :: a,b,c
 
     integer(hid_t)                 :: grp_id, dset_id, dspace_id
     integer(hsize_t), dimension(3) :: dset_dims, dset_maxdims
@@ -1637,12 +1637,12 @@ module hdf5_wrapper
   end subroutine hdf5_write_data_3d_logical
 
   subroutine hdf5_write_data_4d_logical(ifile, dsetfull, darray)
-    integer(hid_t), intent(in)   :: ifile
-    character(len=*), intent(in) :: dsetfull
-    logical, dimension(:,:,:,:)  :: darray
+    integer(hid_t), intent(in)         :: ifile
+    character(len=*), intent(in)       :: dsetfull
+    logical, dimension(:,:,:,:)        :: darray
 
-    integer(4), allocatable      :: darrayi(:,:,:,:)
-    integer                      :: a,b,c,d
+    integer(logical_size), allocatable :: darrayi(:,:,:,:)
+    integer                            :: a,b,c,d
 
     integer(hid_t)                 :: grp_id, dset_id, dspace_id
     integer(hsize_t), dimension(4) :: dset_dims, dset_maxdims
@@ -1691,12 +1691,12 @@ module hdf5_wrapper
   end subroutine hdf5_write_data_4d_logical
 
   subroutine hdf5_write_data_5d_logical(ifile, dsetfull, darray)
-    integer(hid_t), intent(in)    :: ifile
-    character(len=*), intent(in)  :: dsetfull
-    logical, dimension(:,:,:,:,:) :: darray
+    integer(hid_t), intent(in)         :: ifile
+    character(len=*), intent(in)       :: dsetfull
+    logical, dimension(:,:,:,:,:)      :: darray
 
-    integer(4), allocatable       :: darrayi(:,:,:,:,:)
-    integer                       :: a,b,c,d,e
+    integer(logical_size), allocatable :: darrayi(:,:,:,:,:)
+    integer                            :: a,b,c,d,e
 
     integer(hid_t)                   :: grp_id, dset_id, dspace_id
     integer(hsize_t), dimension(5)   :: dset_dims, dset_maxdims
@@ -1747,12 +1747,12 @@ module hdf5_wrapper
   end subroutine hdf5_write_data_5d_logical
 
   subroutine hdf5_write_data_6d_logical(ifile, dsetfull, darray)
-    integer(hid_t), intent(in)      :: ifile
-    character(len=*), intent(in)    :: dsetfull
-    logical, dimension(:,:,:,:,:,:) :: darray
+    integer(hid_t), intent(in)         :: ifile
+    character(len=*), intent(in)       :: dsetfull
+    logical, dimension(:,:,:,:,:,:)    :: darray
 
-    integer(4), allocatable         :: darrayi(:,:,:,:,:,:)
-    integer                         :: a,b,c,d,e,f
+    integer(logical_size), allocatable :: darrayi(:,:,:,:,:,:)
+    integer                            :: a,b,c,d,e,f
 
     integer(hid_t)                     :: grp_id, dset_id, dspace_id
     integer(hsize_t), dimension(6)     :: dset_dims, dset_maxdims
@@ -1807,12 +1807,12 @@ module hdf5_wrapper
   end subroutine hdf5_write_data_6d_logical
 
   subroutine hdf5_write_data_7d_logical(ifile, dsetfull, darray)
-    integer(hid_t), intent(in)        :: ifile
-    character(len=*), intent(in)      :: dsetfull
-    logical, dimension(:,:,:,:,:,:,:) :: darray
+    integer(hid_t), intent(in)         :: ifile
+    character(len=*), intent(in)       :: dsetfull
+    logical, dimension(:,:,:,:,:,:,:)  :: darray
 
-    integer(4), allocatable           :: darrayi(:,:,:,:,:,:,:)
-    integer                           :: a,b,c,d,e,f,g
+    integer(logical_size), allocatable :: darrayi(:,:,:,:,:,:,:)
+    integer                            :: a,b,c,d,e,f,g
 
     integer(hid_t)                       :: grp_id, dset_id, dspace_id
     integer(hsize_t), dimension(7)       :: dset_dims, dset_maxdims
