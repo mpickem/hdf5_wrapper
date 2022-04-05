@@ -23,29 +23,20 @@ In your program use the binding `use hdf5_wrapper` to use the wrapper (see `test
 A minimalistic compilation script can be found in `compile_gfortran.sh` and `compile_ifort.sh`.
 
 ## General thoughts
-This wrapper tries to mimic unix-like pathing wherever possible.
-Group and dataset access is done with the typical unix-like path formalism
-(e.g. `/group1/group2` where the leading and trailing `/` are optional) similarly to the Python library `h5py`.
+This wrapper tries to mimic unix-like behavior: Group and dataset access is done with typical unix-like path formalism
+(`/` is the root folder; nested groups can be created via `/group1/group2`) similarly to the Python library `h5py`.
 The data read-in routines can be used by simply providing allocatable data arrays of the most commonly used datatypes in Fortran (see below).
-Please note that I did not include any dimension or datatype checks. While the majority of routines are subroutines (`call` keyword required)
+Please note that there are no dimensionality or datatype checks. While the majority of routines are subroutines (`call` keyword required)
 some are simple functions which either return `logical` or `integer` datatypes.
 These are marked accordingly in [Summary of commands](#Summary-of-commands).
 ### Implicit data transposition
-Here I simply want to mention one of the biggest pitfalls when handling hdf5 files with Fortran, namely
-the implicit data transposition. Already when creating a simple file with a multidimensional dataset
-and looking at said file with an external tool (e.g. `h5ls -lr <filename>`) one notices that the
-dataset dimensions are reversed. That means if we, inside Fortran, create a three-dimensional dataset with a shape of `[ 4, 8, 2 ]`,
-inspecting it with `h5ls` will show a shape of `[ 2, 8, 4]`.
-
-This is not a bug and simply illustrates
-the difference between the row-major order of C, Python, etc. and the column-major order of Fortran.
-When saving the dataset with Fortran it will be stored as the contiguous memory as Fortran sees it (column-major).
-Opening the same dataset with other tools this data will be interpreted as row-major which causes the full transposition
-of the dataset. This implicit data transposition is important to keep in mind when handling Fortran in combination
-with other row-major languages
+One of the biggest pitfalls when handling hdf5 files with Fortran is the implicit implicit data transposition.
+While languages like C and Python employ row-major ordering, Fortran employs column-major ordering.
+This must be be kept in mind when interfacing these languages.
+Creating a three-dimensional dataset with a shape of `[ 4, 8, 2 ]` via this wrapper will be naturally result
+in an array shape with a full transposition `[ 2, 8, 4]` in C, Python, and tools like `h5ls` provided by the HDF5 library.
 ### A few handy commands
-As already mentioned, when inspecting hdf5 files from the shell `h5ls` (installed with the hdf5 installation) is a good tip.
-Here are some of my most commonly used commands:
+Inspecting hdf5 files from the shell can easily be done with `h5ls`. Some helpful flags include
 * `h5ls -lr`: (**r**)ecursively (**l**)ist all groups and datasets
 * `h5ls -vlr`: (**v**)erbosely and (**r**)ecursively (**l**)ist everything (this includes attributes, datatypes, etc.)
 * `h5ls -d`: inspect the (**d**)ata directly by simply appending the full unix-like path after the file without space (e.g. `file.hdf5/group1/dset`)
@@ -148,7 +139,7 @@ work the same way, only that we have to provide an allocatable array with the ma
 Please note that there is neither a check for matching datatypes nor a check for matching dimensions.
 From the above list HDF5 natively supports only `integer`, `real(4)`, and `real(8)`. `logical`, `complex(4)`,
 and `complex(8)` on the other hand must be constructed manually. In order to achieve maximum compatibility
-with `h5py` ([supported datatypes](https://docs.h5py.org/en/stable/faq.html#what-datatypes-are-supported)) I employed the identical structures:
+with `h5py` ([supported datatypes](https://docs.h5py.org/en/stable/faq.html#what-datatypes-are-supported)) the identical structures are employed:
 
 | hdf5 datatype   | internal                                      |
 | --------------- | --------------------------------------------- |
@@ -204,8 +195,7 @@ end program
 | `hdf5_get_number_attributes(ifile, location)`                 | get number of attributes             |
 | `hdf5_list_attributes(ifile, location, list)`                 | get list of attributes               |
 
-We also provide a small interface for reading and writing attributes.
-The following datatypes are supported:
+Attributes additionally support strings of variable size:
 
 * `logical`
 * `integer`
@@ -233,9 +223,11 @@ program attributes
 
 	call hdf5_write_data(ifile, '/group1/dataset', x)
 
-	! attach to group
+	! attach to root
+	call hdf5_write_attribute(ifile, '/', 'attr_root', .true.)
+	! attach to existing group
 	call hdf5_write_attribute(ifile, '/group1', 'attr_name1', 1.23d0)
-	! attach to dataset
+	! attach to existing dataset
 	call hdf5_write_attribute(ifile, '/group1/dataset', 'attr_name2', 'astring')
 
 	! read the above attribute into the variable y
