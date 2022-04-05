@@ -30,11 +30,11 @@ Please note that there are no dimensionality or datatype checks. While the major
 some are simple functions which either return `logical` or `integer` datatypes.
 These are marked accordingly in [Summary of commands](#Summary-of-commands).
 ### Implicit data transposition
-One of the biggest pitfalls when handling hdf5 files with Fortran is the implicit implicit data transposition.
+One of the biggest pitfalls when handling hdf5 files with Fortran is the implicit data transposition.
 While languages like C and Python employ row-major ordering, Fortran employs column-major ordering.
-This must be be kept in mind when interfacing these languages.
-Creating a three-dimensional dataset with a shape of `[ 4, 8, 2 ]` via this wrapper will be naturally result
-in an array shape with a full transposition `[ 2, 8, 4]` in C, Python, and tools like `h5ls` provided by the HDF5 library.
+This must be kept in mind when interfacing these languages.
+Creating a three-dimensional dataset with a shape of `[4, 8, 2]` via this wrapper will naturally result
+in an array shape with a full transposition `[2, 8, 4]` in C, Python, and tools like `h5ls` provided by the HDF5 library.
 ### A few handy commands
 Inspecting hdf5 files from the shell can easily be done with `h5ls`. Some helpful flags include
 * `h5ls -lr`: (**r**)ecursively (**l**)ist all groups and datasets
@@ -206,7 +206,7 @@ Attributes additionally support strings of variable size:
 * `character(len=*)`
 
 Attributes can be attached to both groups and datasets. For this reason
-we forgo automatic parent group creation. Any non-existance of objects will trigger an error.
+we forgo automatic parent group creation. Any non-existence of objects will trigger an error.
 Please note that the written strings will be byte strings within Python.
 
 ```
