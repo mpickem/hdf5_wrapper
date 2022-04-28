@@ -9,7 +9,7 @@ tar xf hdf5-x.y.z.tar
 cd hdf5-x.y.z
 CC=gcc
 FC=gfortran
-./configure --enable-fortran --enable-fortran2003 --prefix=/opt/hdf5-x.y.z_gcc
+./configure --enable-fortran --prefix=/opt/hdf5-x.y.z_gcc
 make
 make check
 make install
