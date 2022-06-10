@@ -5,7 +5,7 @@ Make sure to always use the latest version (currently: 1.13.0). Older versions (
 Installation for e.g. gnu compiler is done via
 
 ```
-tar xf hdf5-x.y.z.tar
+tar xf hdf5-x.y.z.tar.gz
 cd hdf5-x.y.z
 CC=gcc
 FC=gfortran
