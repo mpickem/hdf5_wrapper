@@ -1,6 +1,6 @@
 # HDF5 wrapper
 ## HDF5 Installation
-Download the tar ball from the [official homepage](http://portal.hdfgroup.org/display/support).
+Download the tar ball from the [official homepage](https://www.hdfgroup.org/downloads/hdf5/source-code/).
 Make sure to always use the latest version (currently: 1.13.0). Older versions (1.8 and below) may result in unintentional problems, especially with non-native datatypes like `logical`.
 Installation for e.g. gnu compiler is done via
 
